@@ -74,6 +74,7 @@ const FavoritesScreen = ({ navigation }) => {
           keyExtractor={(item, index) => `${item._id || item.id}-${index}`}
           renderItem={renderFavoriteItem}
           contentContainerStyle={{ padding: 15 }}
+          showsVerticalScrollIndicator={false} 
           refreshControl={
             <RefreshControl 
               refreshing={refreshing} 

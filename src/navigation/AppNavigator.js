@@ -15,6 +15,11 @@ import SearchScreen from '../screens/SearchScreen';
 import FavoritesScreen from '../screens/FavoritesScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import PlayerScreen from '../screens/PlayerScreen';
+import PlaylistsScreen from '../screens/PlaylistsScreen';
+import AdminDashboard from '../screens/AdminDashboard';
+import AboutScreen from '../screens/AboutScreen';
+import SettingsScreen from '../screens/SettingsScreen'
+
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -84,7 +89,9 @@ const AppNavigator = () => {
 
   return (
     <NavigationContainer>
+
       <Stack.Navigator 
+      key={user ? 'user' : 'guest'} 
         screenOptions={{ 
           headerShown: false,
           animation: 'slide_from_right',
@@ -106,9 +113,52 @@ const AppNavigator = () => {
                 animation: 'slide_from_bottom',
               }}
             />
+            <Stack.Screen 
+              name="Playlists" 
+              component={PlaylistsScreen}
+              options={{
+                headerShown: true,
+                headerStyle: { backgroundColor: '#0a0a0a' },
+                headerTintColor: '#10b981',
+                headerTitle: 'My Playlists',
+              }}
+
+            />
+                  <Stack.Screen 
+  name="AdminDashboard" 
+  component={AdminDashboard}
+  options={{
+    headerShown: true,
+    headerStyle: { backgroundColor: '#0a0a0a' },
+    headerTintColor: '#10b981',
+    headerTitle: 'Admin Dashboard',
+  }}
+/>
+<Stack.Screen 
+  name="Settings" 
+  component={SettingsScreen}
+  options={{
+    headerShown: true,
+    headerStyle: { backgroundColor: '#0a0a0a' },
+    headerTintColor: '#10b981',
+    headerTitle: 'Settings',
+  }}
+/>
+<Stack.Screen 
+  name="About" 
+  component={AboutScreen}
+  options={{
+    headerShown: true,
+    headerStyle: { backgroundColor: '#0a0a0a' },
+    headerTintColor: '#10b981',
+    headerTitle: 'About',
+  }}
+/>
+
           </>
         )}
       </Stack.Navigator>
+
     </NavigationContainer>
   );
 };

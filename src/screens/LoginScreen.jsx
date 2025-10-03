@@ -44,7 +44,7 @@ const LoginScreen = ({ navigation }) => {
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="p-5 justify-center">
         <View className="items-center mb-10">
-          <Text className="text-4xl font-bold text-white mb-2.5">🎵 Music App</Text>
+          <Text className="text-4xl font-bold text-white mb-2.5">🎵 Tune Sphere</Text>
           <Text className="text-lg text-gray-400">
             {isAdminLogin ? 'Admin Login' : 'Welcome Back'}
           </Text>

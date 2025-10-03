@@ -14,7 +14,8 @@ import TrendingSection from '../components/TrendingSection';
 
 const HomeScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [songs, setSongs] = useState([]);
+  const [allSongs, setAllSongs] = useState([]); // Store all songs
+  const [displayedSongs, setDisplayedSongs] = useState([]); // Filtered songs to display
   const [trendingSongs, setTrendingSongs] = useState([]);
   const [featuredPlaylists, setFeaturedPlaylists] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -24,6 +25,11 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     loadInitialData();
   }, []);
+
+  // Filter songs whenever platform changes
+  useEffect(() => {
+    filterSongs();
+  }, [selectedPlatform, allSongs]);
 
   const loadInitialData = async () => {
     try {
@@ -38,19 +44,25 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
+  const filterSongs = () => {
+    if (selectedPlatform === 'all') {
+      setDisplayedSongs(allSongs);
+    } else {
+      const filtered = allSongs.filter(song => 
+        song.platform?.toLowerCase() === selectedPlatform.toLowerCase()
+      );
+      setDisplayedSongs(filtered);
+    }
+  };
+
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
 
     setLoading(true);
     try {
       const response = await musicAPI.searchSongs(searchQuery);
-      let results = response.data;
-
-      if (selectedPlatform !== 'all') {
-        results = results.filter(song => song.platform === selectedPlatform);
-      }
-
-      setSongs(results);
+      setAllSongs(response.data); // Store all results
+      // filterSongs will be called automatically by useEffect
     } catch (error) {
       console.error('Search error:', error);
     } finally {
@@ -58,10 +70,17 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
+  const handlePlatformChange = (platform) => {
+    setSelectedPlatform(platform);
+    // filterSongs will be called automatically by useEffect
+  };
+
   const onRefresh = async () => {
     setRefreshing(true);
-    setSongs([]);
+    setAllSongs([]);
+    setDisplayedSongs([]);
     setSearchQuery('');
+    setSelectedPlatform('all');
     await loadInitialData();
     setRefreshing(false);
   };
@@ -76,7 +95,7 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View className="flex-1 bg-gray-950">
       <View className="p-5 pt-12">
-        <Text className="text-3xl font-bold text-white">🎵 Music App</Text>
+        <Text className="text-3xl font-bold text-white">Music App</Text>
       </View>
 
       <SearchBar
@@ -87,23 +106,24 @@ const HomeScreen = ({ navigation }) => {
 
       <PlatformTabs
         selectedPlatform={selectedPlatform}
-        onSelectPlatform={setSelectedPlatform}
+        onSelectPlatform={handlePlatformChange}
       />
 
       {loading ? (
         <ActivityIndicator size="large" color="#10b981" className="mt-12" />
       ) : (
         <FlatList
-          data={songs.length > 0 ? songs : []}
+          data={displayedSongs}
           keyExtractor={(item, index) => `${item._id || item.id}-${index}`}
           renderItem={renderSongItem}
+          showsVerticalScrollIndicator={false}
           ListHeaderComponent={
-            songs.length === 0 && (
+            displayedSongs.length === 0 && (
               <>
                 <TrendingSection
                   songs={trendingSongs}
                   onSongPress={(song) => navigation.navigate('Player', { song })}
-                  title="Trending Now 🔥"
+                  title="Trending Now"
                 />
                 
                 {featuredPlaylists.length > 0 && (
@@ -125,9 +145,11 @@ const HomeScreen = ({ navigation }) => {
             )
           }
           ListEmptyComponent={
-            !loading && songs.length === 0 && trendingSongs.length === 0 && (
+            !loading && displayedSongs.length === 0 && allSongs.length > 0 && (
               <View className="items-center py-10">
-                <Text className="text-gray-400 text-base">No songs available</Text>
+                <Text className="text-gray-400 text-base">
+                  No {selectedPlatform} songs found
+                </Text>
               </View>
             )
           }

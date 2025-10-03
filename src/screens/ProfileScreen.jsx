@@ -19,12 +19,30 @@ const ProfileScreen = ({ navigation }) => {
         { text: 'Cancel', style: 'cancel' },
         { 
           text: 'Logout', 
-          onPress: () => logout(),
+          onPress: async () => {
+            await logout();
+          },
           style: 'destructive'
         },
       ]
     );
   };
+
+ const handleNavigation = (screen) => {
+  if (screen === 'Favorites') {
+    navigation.navigate('Favorites');
+  } else if (screen === 'My Playlists') {
+    navigation.navigate('Playlists');
+  } else if (screen === 'Admin Dashboard') {
+    navigation.navigate('AdminDashboard');
+  } else if (screen === 'Settings') {
+    navigation.navigate('Settings');
+  } else if (screen === 'About') {
+    navigation.navigate('About');
+  } else {
+    Alert.alert('Coming Soon', `${screen} feature will be available soon!`);
+  }
+};
 
   return (
     <ScrollView className="flex-1 bg-gray-950">
@@ -55,7 +73,7 @@ const ProfileScreen = ({ navigation }) => {
         {isAdmin && (
           <TouchableOpacity 
             className="flex-row items-center bg-gray-800 p-4 rounded-lg mb-2.5"
-            onPress={() => navigation.navigate('AdminDashboard')}
+            onPress={() => handleNavigation('Admin Dashboard')}
           >
             <Text className="text-2xl mr-4">📊</Text>
             <Text className="flex-1 text-white text-base">Admin Dashboard</Text>
@@ -65,7 +83,7 @@ const ProfileScreen = ({ navigation }) => {
 
         <TouchableOpacity 
           className="flex-row items-center bg-gray-800 p-4 rounded-lg mb-2.5"
-          onPress={() => navigation.navigate('Playlists')}
+          onPress={() => handleNavigation('My Playlists')}
         >
           <Text className="text-2xl mr-4">🎵</Text>
           <Text className="flex-1 text-white text-base">My Playlists</Text>
@@ -74,7 +92,7 @@ const ProfileScreen = ({ navigation }) => {
 
         <TouchableOpacity 
           className="flex-row items-center bg-gray-800 p-4 rounded-lg mb-2.5"
-          onPress={() => navigation.navigate('Favorites')}
+          onPress={() => handleNavigation('Favorites')}
         >
           <Text className="text-2xl mr-4">❤️</Text>
           <Text className="flex-1 text-white text-base">Favorites</Text>
@@ -83,7 +101,7 @@ const ProfileScreen = ({ navigation }) => {
 
         <TouchableOpacity 
           className="flex-row items-center bg-gray-800 p-4 rounded-lg mb-2.5"
-          onPress={() => Alert.alert('Coming Soon', 'Edit profile feature coming soon!')}
+          onPress={() => handleNavigation('Edit Profile')}
         >
           <Text className="text-2xl mr-4">✏️</Text>
           <Text className="flex-1 text-white text-base">Edit Profile</Text>
@@ -92,10 +110,19 @@ const ProfileScreen = ({ navigation }) => {
 
         <TouchableOpacity 
           className="flex-row items-center bg-gray-800 p-4 rounded-lg mb-2.5"
-          onPress={() => Alert.alert('Settings', 'Settings page coming soon!')}
+          onPress={() => handleNavigation('Settings')}
         >
           <Text className="text-2xl mr-4">⚙️</Text>
           <Text className="flex-1 text-white text-base">Settings</Text>
+          <Text className="text-gray-400 text-2xl">›</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          className="flex-row items-center bg-gray-800 p-4 rounded-lg mb-2.5"
+          onPress={() => handleNavigation('About')}
+        >
+          <Text className="text-2xl mr-4">ℹ️</Text>
+          <Text className="flex-1 text-white text-base">About</Text>
           <Text className="text-gray-400 text-2xl">›</Text>
         </TouchableOpacity>
       </View>

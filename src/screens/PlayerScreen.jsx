@@ -5,6 +5,9 @@ import {
   Image,
   TouchableOpacity,
   Alert,
+  Linking,
+  Platform,
+  ScrollView,
 } from 'react-native';
 import { usePlayer } from '../context/PlayerContext';
 import { userAPI } from '../services/api';
@@ -13,6 +16,7 @@ import PlayerControls from '../components/PlayerControls';
 const PlayerScreen = ({ route, navigation }) => {
   const { song } = route.params;
   const [isFavorite, setIsFavorite] = useState(false);
+  
   const { 
     isPlaying, 
     togglePlayPause, 
@@ -57,66 +61,143 @@ const PlayerScreen = ({ route, navigation }) => {
     }
   };
 
+  const getEmbedUrl = () => {
+    const platform = song.platform?.toLowerCase();
+    
+    if (platform === 'youtube') {
+      const videoId = song.url?.split('v=')[1]?.split('&')[0] || song.id;
+      return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+    } else if (platform === 'spotify') {
+      const trackId = song.url?.split('/track/')[1]?.split('?')[0] || song.id;
+      return `https://open.spotify.com/embed/track/${trackId}`;
+    }
+    
+    return null;
+  };
+
+  const handlePlaySong = () => {
+    const url = song.url;
+    
+    if (Platform.OS === 'web') {
+      // On web, open in new tab
+      window.open(url, '_blank');
+    } else {
+      // On mobile, open in external app
+      Linking.openURL(url).catch(err => {
+        Alert.alert('Error', 'Could not open the link');
+        console.error('Error opening URL:', err);
+      });
+    }
+  };
+
+  // Web iframe component
+  const WebPlayer = () => {
+    const embedUrl = getEmbedUrl();
+    
+    if (!embedUrl) {
+      return (
+        <View className="bg-gray-800 p-6 rounded-lg mx-5 mb-5">
+          <Text className="text-white text-center mb-4">
+            Embedded player not available for {song.platform}
+          </Text>
+          <TouchableOpacity
+            className="bg-green-500 p-3 rounded-lg"
+            onPress={handlePlaySong}
+          >
+            <Text className="text-white text-center font-bold">
+              Open in {song.platform}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    return (
+      <View className="mx-5 mb-5">
+        <iframe
+          src={embedUrl}
+          width="100%"
+          height="400"
+          frameBorder="0"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          style={{ borderRadius: 10 }}
+          title="Music Player"
+        />
+      </View>
+    );
+  };
+
   return (
-    <View className="flex-1 bg-gray-950 p-5">
+    <ScrollView className="flex-1 bg-gray-950">
       <TouchableOpacity 
-        className="mt-10 mb-5"
+        className="mt-10 ml-5 mb-5"
         onPress={() => navigation.goBack()}
       >
-        <Text className="text-green-500 text-base">← Back</Text>
+        <Text className="text-green-500 text-base">Back</Text>
       </TouchableOpacity>
 
       <Image
         source={{ uri: song.thumbnail || 'https://via.placeholder.com/300' }}
-        className="w-full h-72 rounded-2xl mb-8"
+        className="w-11/12 h-72 rounded-2xl mb-8 mx-auto"
+        resizeMode="cover"
       />
 
-      <View className="items-center mb-5">
+      <View className="items-center mb-5 px-5">
         <Text className="text-white text-2xl font-bold text-center mb-2.5">
           {song.title}
         </Text>
-        <Text className="text-gray-400 text-lg mb-2">
+        <Text className="text-gray-400 text-lg mb-2 text-center">
           {song.artist}
         </Text>
         <Text className="text-green-500 text-sm capitalize">
           {song.platform}
         </Text>
+        {song.duration && (
+          <Text className="text-gray-500 text-sm mt-1">
+            {song.duration}
+          </Text>
+        )}
       </View>
 
-      <View className="items-center mb-8">
+      {/* Show iframe player on web */}
+      {Platform.OS === 'web' && <WebPlayer />}
+
+      <View className="items-center mb-8 px-5">
         <TouchableOpacity 
           onPress={toggleFavorite} 
-          className="flex-row items-center bg-gray-800 px-5 py-3 rounded-full"
+          className="flex-row items-center bg-gray-800 px-5 py-3 rounded-full mb-3"
         >
           <Text className="text-xl mr-2">{isFavorite ? '❤️' : '🤍'}</Text>
           <Text className="text-white text-sm">
             {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
           </Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          className="bg-green-500 px-8 py-4 rounded-full"
+          onPress={handlePlaySong}
+        >
+          <Text className="text-white text-lg font-bold">
+            {Platform.OS === 'web' ? 'Open in New Tab' : `Open in ${song.platform}`}
+          </Text>
+        </TouchableOpacity>
       </View>
 
-      <PlayerControls
-        isPlaying={isPlaying}
-        onPlayPause={togglePlayPause}
-        onPrevious={playPrevious}
-        onNext={playNext}
-        isShuffle={isShuffle}
-        isRepeat={isRepeat}
-        onShuffle={toggleShuffle}
-        onRepeat={toggleRepeat}
-      />
-
-      {song.url && (
-        <TouchableOpacity 
-          className="bg-gray-800 p-4 rounded-lg items-center mt-5"
-          onPress={() => {
-            Alert.alert('Open', `Open in ${song.platform}`);
-          }}
-        >
-          <Text className="text-white text-base">Open in {song.platform}</Text>
-        </TouchableOpacity>
-      )}
-    </View>
+      <View className="px-5 pb-10">
+        <View className="bg-gray-800 p-4 rounded-lg">
+          <Text className="text-gray-400 text-sm mb-2">Platform: {song.platform}</Text>
+          {song.duration && (
+            <Text className="text-gray-400 text-sm mb-2">Duration: {song.duration}</Text>
+          )}
+          <Text className="text-gray-400 text-sm">
+            {Platform.OS === 'web' 
+              ? 'Player embedded above or click button to open in new tab'
+              : `Click button to open in ${song.platform} app`
+            }
+          </Text>
+        </View>
+      </View>
+    </ScrollView>
   );
 };
 
