@@ -95,7 +95,7 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View className="flex-1 bg-gray-950">
       <View className="p-5 pt-12">
-        <Text className="text-3xl font-bold text-white">Music App</Text>
+        <Text className="text-3xl font-bold text-white">TuneSphere App</Text>
       </View>
 
       <SearchBar

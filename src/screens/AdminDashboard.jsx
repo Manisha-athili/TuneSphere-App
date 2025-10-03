@@ -75,7 +75,7 @@ const AdminDashboard = ({ navigation }) => {
 
           <View className="bg-orange-900 p-4 rounded-lg mb-3 w-[48%]">
             <Text className="text-orange-200 text-sm mb-1">Admins</Text>
-            <Text className="text-white text-3xl font-bold">{stats?.totalAdmins || 0}</Text>
+            <Text className="text-white text-3xl font-bold">{stats?.totalAdmins || 1}</Text>
           </View>
         </View>
       </View>

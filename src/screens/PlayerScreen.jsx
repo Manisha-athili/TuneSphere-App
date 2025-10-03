@@ -12,10 +12,12 @@ import {
 import { usePlayer } from '../context/PlayerContext';
 import { userAPI } from '../services/api';
 import PlayerControls from '../components/PlayerControls';
+import AddToPlaylistModal from '../components/AddToPlaylistModal';
 
 const PlayerScreen = ({ route, navigation }) => {
   const { song } = route.params;
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showPlaylistModal, setShowPlaylistModal] = useState(false);
   
   const { 
     isPlaying, 
@@ -79,10 +81,8 @@ const PlayerScreen = ({ route, navigation }) => {
     const url = song.url;
     
     if (Platform.OS === 'web') {
-      // On web, open in new tab
       window.open(url, '_blank');
     } else {
-      // On mobile, open in external app
       Linking.openURL(url).catch(err => {
         Alert.alert('Error', 'Could not open the link');
         console.error('Error opening URL:', err);
@@ -90,7 +90,6 @@ const PlayerScreen = ({ route, navigation }) => {
     }
   };
 
-  // Web iframe component
   const WebPlayer = () => {
     const embedUrl = getEmbedUrl();
     
@@ -133,7 +132,7 @@ const PlayerScreen = ({ route, navigation }) => {
         className="mt-10 ml-5 mb-5"
         onPress={() => navigation.goBack()}
       >
-        <Text className="text-green-500 text-base">Back</Text>
+        <Text className="text-green-500 text-base">← Back</Text>
       </TouchableOpacity>
 
       <Image
@@ -159,26 +158,35 @@ const PlayerScreen = ({ route, navigation }) => {
         )}
       </View>
 
-      {/* Show iframe player on web */}
       {Platform.OS === 'web' && <WebPlayer />}
 
       <View className="items-center mb-8 px-5">
-        <TouchableOpacity 
-          onPress={toggleFavorite} 
-          className="flex-row items-center bg-gray-800 px-5 py-3 rounded-full mb-3"
-        >
-          <Text className="text-xl mr-2">{isFavorite ? '❤️' : '🤍'}</Text>
-          <Text className="text-white text-sm">
-            {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-          </Text>
-        </TouchableOpacity>
+        <View className="flex-row gap-3 mb-4">
+          <TouchableOpacity 
+            onPress={toggleFavorite} 
+            className="flex-row items-center bg-gray-800 px-5 py-3 rounded-full"
+          >
+            <Text className="text-xl mr-2">{isFavorite ? '❤️' : '🤍'}</Text>
+            <Text className="text-white text-sm">
+              {isFavorite ? 'Favorited' : 'Favorite'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            onPress={() => setShowPlaylistModal(true)}
+            className="flex-row items-center bg-gray-800 px-5 py-3 rounded-full"
+          >
+            <Text className="text-xl mr-2">➕</Text>
+            <Text className="text-white text-sm">Playlist</Text>
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity
-          className="bg-green-500 px-8 py-4 rounded-full"
+          className="bg-green-500 px-8 py-4 rounded-full w-full"
           onPress={handlePlaySong}
         >
-          <Text className="text-white text-lg font-bold">
-            {Platform.OS === 'web' ? 'Open in New Tab' : `Open in ${song.platform}`}
+          <Text className="text-white text-lg font-bold text-center">
+            {Platform.OS === 'web' ? '▶️ Open in New Tab' : `▶️ Open in ${song.platform}`}
           </Text>
         </TouchableOpacity>
       </View>
@@ -197,6 +205,12 @@ const PlayerScreen = ({ route, navigation }) => {
           </Text>
         </View>
       </View>
+
+      <AddToPlaylistModal
+        visible={showPlaylistModal}
+        onClose={() => setShowPlaylistModal(false)}
+        song={song}
+      />
     </ScrollView>
   );
 };
