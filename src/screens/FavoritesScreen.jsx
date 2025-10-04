@@ -7,7 +7,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { userAPI } from '../services/api';
+import { userAPI, musicAPI } from '../services/api';
 import MusicCard from '../components/MusicCard';
 
 const FavoritesScreen = ({ navigation }) => {
@@ -21,16 +21,18 @@ const FavoritesScreen = ({ navigation }) => {
     }, [])
   );
 
-  const loadFavorites = async () => {
-    try {
-      const response = await userAPI.getFavorites();
-      setFavorites(response.data.favorites || []);
-    } catch (error) {
-      console.error('Error loading favorites:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+ // FavoritesScreen.jsx - Use favorites directly
+const loadFavorites = async () => {
+  try {
+    const response = await userAPI.getFavorites();
+    setFavorites(response.data.favorites || []); // Already full objects!
+  } catch (error) {
+    console.error('Error loading favorites:', error);
+    setFavorites([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -74,7 +76,6 @@ const FavoritesScreen = ({ navigation }) => {
           keyExtractor={(item, index) => `${item._id || item.id}-${index}`}
           renderItem={renderFavoriteItem}
           contentContainerStyle={{ padding: 15 }}
-          showsVerticalScrollIndicator={false} 
           refreshControl={
             <RefreshControl 
               refreshing={refreshing} 

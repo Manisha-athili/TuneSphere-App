@@ -7,7 +7,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { playlistAPI } from '../services/api';
+import { playlistAPI, musicAPI } from '../services/api';
 import MusicCard from '../components/MusicCard';
 
 const PlaylistDetailScreen = ({ route, navigation }) => {
@@ -21,17 +21,20 @@ const PlaylistDetailScreen = ({ route, navigation }) => {
   }, []);
 
   const loadPlaylistDetails = async () => {
-    try {
-      const response = await playlistAPI.getPlaylistById(playlist._id);
-      setPlaylistData(response.data);
-      // In a real app, you'd fetch full song details from the song IDs
-      setSongs([]);
-    } catch (error) {
-      console.error('Error loading playlist:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const response = await playlistAPI.getPlaylistById(playlist._id);
+    console.log('Playlist response:', response.data);
+    console.log('Songs:', response.data.songs);
+    
+    setPlaylistData(response.data);
+    setSongs(response.data.songs || []);
+  } catch (error) {
+    console.error('Error loading playlist:', error);
+    setSongs([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleRemoveSong = (songId) => {
     Alert.alert(
@@ -66,7 +69,7 @@ const PlaylistDetailScreen = ({ route, navigation }) => {
       </View>
       <TouchableOpacity
         className="p-2"
-        onPress={() => handleRemoveSong(item.id)}
+        onPress={() => handleRemoveSong(item._id || item.id)}
       >
         <Text className="text-red-500 text-xl">✕</Text>
       </TouchableOpacity>
@@ -88,11 +91,11 @@ const PlaylistDetailScreen = ({ route, navigation }) => {
           {playlistData.name}
         </Text>
         <Text className="text-gray-400 text-sm">
-          {playlistData.songs?.length || 0} songs
+          {songs.length} songs
         </Text>
       </View>
 
-      {playlistData.songs?.length === 0 ? (
+      {songs.length === 0 ? (
         <View className="flex-1 justify-center items-center p-5">
           <Text className="text-white text-xl font-bold mb-2.5">
             No songs in this playlist
@@ -110,7 +113,7 @@ const PlaylistDetailScreen = ({ route, navigation }) => {
       ) : (
         <FlatList
           data={songs}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item._id || item.id}
           renderItem={renderSongItem}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ padding: 15 }}

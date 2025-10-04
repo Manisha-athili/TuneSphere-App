@@ -44,24 +44,32 @@ const PlayerScreen = ({ route, navigation }) => {
     }
   };
 
-  const toggleFavorite = async () => {
-    try {
-      const response = await userAPI.getFavorites();
-      let favorites = response.data.favorites || [];
-      
-      if (isFavorite) {
-        favorites = favorites.filter(id => id !== (song._id || song.id));
-      } else {
-        favorites.push(song._id || song.id);
-      }
-      
-      await userAPI.updateFavorites(favorites);
-      setIsFavorite(!isFavorite);
-      Alert.alert('Success', isFavorite ? 'Removed from favorites' : 'Added to favorites');
-    } catch (error) {
-      Alert.alert('Error', 'Failed to update favorites');
+ // PlayerScreen.jsx - Update toggleFavorite
+const toggleFavorite = async () => {
+  try {
+    if (isFavorite) {
+      // Remove from favorites
+      await userAPI.removeFavorite(song._id || song.id || song.songId);
+      setIsFavorite(false);
+      Alert.alert('Success', 'Removed from favorites');
+    } else {
+      // Add to favorites - send full song object
+      await userAPI.addFavorite({
+        songId: song._id || song.id || song.songId,
+        title: song.title,
+        artist: song.artist,
+        platform: song.platform,
+        thumbnail: song.thumbnail,
+        url: song.url,
+        duration: song.duration,
+      });
+      setIsFavorite(true);
+      Alert.alert('Success', 'Added to favorites');
     }
-  };
+  } catch (error) {
+    Alert.alert('Error', 'Failed to update favorites');
+  }
+};
 
   const getEmbedUrl = () => {
     const platform = song.platform?.toLowerCase();

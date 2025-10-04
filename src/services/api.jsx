@@ -31,10 +31,13 @@ export const authAPI = {
 };
 
 // User APIs
+// api.jsx - Update userAPI
 export const userAPI = {
   getProfile: () => api.get('/users/profile'),
   updateProfile: (data) => api.put('/users/profile', data),
   getFavorites: () => api.get('/users/favorites'),
+  addFavorite: (song) => api.post('/users/favorites', song),
+  removeFavorite: (songId) => api.delete(`/users/favorites/${songId}`),
   updateFavorites: (favorites) => api.put('/users/favorites', { favorites }),
   getRecentlyPlayed: () => api.get('/users/recently-played'),
 };
