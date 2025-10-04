@@ -205,6 +205,10 @@ This will install all dependencies from `package.json`:
   }
 }
 ```
+assets :
+
+https://res.cloudinary.com/doiezptnn/image/upload/v1759546222/Screenshot_2025-10-04_081901_emna3g.png
+
 
 ### Step 3: Clear Cache (if needed)
 
